@@ -1,0 +1,13 @@
+{
+  "name": "aws-auto-hostname",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Niranjan Rajendran <me@niranjan.io>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node -e \"require('./index.js').handler()\""
+  },
+  "dependencies": {
+    "aws-sdk": "^2.269.1"
+  }
+}

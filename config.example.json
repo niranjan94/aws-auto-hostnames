@@ -1,0 +1,9 @@
+{
+  "aws": {
+    "region": "ap-southeast-1"
+  },
+  "dns": {
+    "ttl": 300,
+    "ignoreZones": ["domain-to-ignore.com", "ZONEID12TOIGNORE"]
+  }
+}
