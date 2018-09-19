@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const deepmerge = require('./deepmerge');
-const { table } = require('table');
+const {table} = require('table');
 const _ = require('lodash');
 const colors = require('colors/safe');
 
@@ -94,7 +94,7 @@ exports.handler = async () => {
 
       const clusterMatched = hostname.match(/\d{4}.(.+)/);
 
-      if(clusterMatched && clusterMatched.length >= 2) {
+      if (clusterMatched && clusterMatched.length >= 2) {
         const clusterHostName = clusterMatched[1];
 
         clusterHostnames[clusterHostName] = clusterHostnames[clusterHostName] || {
@@ -104,24 +104,33 @@ exports.handler = async () => {
         };
 
         clusterHostnames[clusterHostName].privateIps.push(instance.privateIp);
-        clusterHostnames[clusterHostName].publicIps.push(instance.publicIp);
+
+        if (instance.publicIp) {
+          clusterHostnames[clusterHostName].publicIps.push(instance.publicIp);
+        }
       }
 
       zoneUpdateChanges[zone.id] = zoneUpdateChanges[zone.id] || [];
-      zoneUpdateChanges[zone.id].push(
-        {
-          Action: 'UPSERT',
-          ResourceRecordSet: {
-            Name: hostname,
-            ResourceRecords: [
-              {
-                Value: instance.publicIp
-              }
-            ],
-            TTL: config.dns.ttl,
-            Type: 'A'
+
+      if (instance.publicIp) {
+        zoneUpdateChanges[zone.id].push(
+          {
+            Action: 'UPSERT',
+            ResourceRecordSet: {
+              Name: hostname,
+              ResourceRecords: [
+                {
+                  Value: instance.publicIp
+                }
+              ],
+              TTL: config.dns.ttl,
+              Type: 'A'
+            }
           }
-        },
+        );
+      }
+
+      zoneUpdateChanges[zone.id].push(
         {
           Action: 'UPSERT',
           ResourceRecordSet: {
@@ -144,18 +153,24 @@ exports.handler = async () => {
       const zoneId = clusterHostnames[clusterHostname].zoneId;
 
       zoneUpdateChanges[zoneId] = zoneUpdateChanges[zoneId] || [];
-      zoneUpdateChanges[zoneId].push(
-        {
-          Action: 'UPSERT',
-          ResourceRecordSet: {
-            Name: clusterHostname,
-            ResourceRecords: clusterHostnames[clusterHostname].publicIps.map(ip => ({
-              Value: ip
-            })),
-            TTL: config.dns.ttl,
-            Type: 'A'
+
+      if (clusterHostnames[clusterHostname].publicIps && clusterHostnames[clusterHostname].publicIps.length > 0) {
+        zoneUpdateChanges[zoneId].push(
+          {
+            Action: 'UPSERT',
+            ResourceRecordSet: {
+              Name: clusterHostname,
+              ResourceRecords: clusterHostnames[clusterHostname].publicIps.map(ip => ({
+                Value: ip
+              })),
+              TTL: config.dns.ttl,
+              Type: 'A'
+            }
           }
-        },
+        );
+      }
+
+      zoneUpdateChanges[zoneId].push(
         {
           Action: 'UPSERT',
           ResourceRecordSet: {
@@ -175,7 +190,6 @@ exports.handler = async () => {
     [colors.bold('Zone'), colors.bold('Hostname'), colors.bold('Type'), colors.bold('TTL'), colors.bold('Resource')]
   ];
 
-
   for (const zoneId in zoneUpdateChanges) {
     if (zoneUpdateChanges.hasOwnProperty(zoneId) && zoneUpdateChanges[zoneId].length > 0) {
       const changes = zoneUpdateChanges[zoneId];
@@ -187,7 +201,6 @@ exports.handler = async () => {
         StartRecordName: 'a',
         StartRecordType: 'A'
       }).promise()).ResourceRecordSets.filter(it => it.Type === 'A');
-
 
       log(`[${zoneId}] Generating resource record set diff.`);
 
@@ -222,10 +235,10 @@ exports.handler = async () => {
         log(`[${zoneId}] Applying resource record sets.`);
 
         await route53.changeResourceRecordSets({
-        HostedZoneId: zoneId,
-        ChangeBatch: {
-          Changes: changesDiff
-        }
+          HostedZoneId: zoneId,
+          ChangeBatch: {
+            Changes: changesDiff
+          }
         }).promise();
 
         log(`[${zoneId}] Applied ${changesDiff.length} resource record sets ✓`);
