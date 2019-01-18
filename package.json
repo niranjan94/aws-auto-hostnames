@@ -5,7 +5,9 @@
   "author": "Niranjan Rajendran <me@niranjan.io>",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "node -e \"require('./index.js').handler()\""
+    "start": "node -e \"require('./index.js').handler()\"",
+    "dry-run": "node -e \"require('./index.js').handler()\"",
+    "apply": "DRY_RUN=false node -e \"require('./index.js').handler()\""
   },
   "dependencies": {
     "aws-sdk": "^2.269.1",

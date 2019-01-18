@@ -231,7 +231,7 @@ exports.handler = async () => {
         )
       );
 
-      if (changesDiff.length > 0) {
+      if (process.env.DRY_RUN === 'false' && changesDiff.length > 0) {
         log(`[${zoneId}] Applying resource record sets.`);
 
         await route53.changeResourceRecordSets({
