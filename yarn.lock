@@ -8,9 +8,9 @@
   dependencies:
     colors "*"
 
-"@types/lodash@^4.14.146":
-  version "4.14.146"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.146.tgz#de0d2c8610012f12a6a796455054cbc654f8fecf"
+"@types/lodash@^4.14.151":
+  version "4.14.151"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.151.tgz#7d58cac32bedb0ec37cb7f99094a167d6176c9d5"
 
 ajv@^6.10.2:
   version "6.10.2"
