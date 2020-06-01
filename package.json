@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "@types/colors": "^1.2.1",
-    "@types/lodash": "^4.14.146"
+    "@types/lodash": "^4.14.154"
   }
 }
