@@ -77,7 +77,8 @@ exports.handler = async () => {
         id: instance.InstanceId,
         hostnames: instance.Tags.find(tag => tag.Key === 'hostnames').Value.split(',').map(s => s.trim()),
         privateIp: instance.PrivateIpAddress,
-        publicIp: instance.PublicIpAddress
+        publicIp: instance.PublicIpAddress,
+        publicDns: instance.PublicDnsName
       });
     }
   }
@@ -112,7 +113,7 @@ exports.handler = async () => {
 
       zoneUpdateChanges[zone.id] = zoneUpdateChanges[zone.id] || [];
 
-      if (instance.publicIp) {
+      if (instance.publicDns) {
         zoneUpdateChanges[zone.id].push(
           {
             Action: 'UPSERT',
@@ -120,11 +121,11 @@ exports.handler = async () => {
               Name: hostname,
               ResourceRecords: [
                 {
-                  Value: instance.publicIp
+                  Value: instance.publicDns
                 }
               ],
               TTL: config.dns.ttl,
-              Type: 'A'
+              Type: 'CNAME'
             }
           }
         );
